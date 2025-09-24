@@ -97,11 +97,13 @@ Every ETL operation MUST be logged, monitored, and traceable. Structured logging
 ## Data Extraction Specifications
 
 ### Prime Awards Field Requirements (usaspending_prime_awards_slimv2)
+
 **Data Type**: Procurement contracts only (no grants)
 **Required Fields**: Exactly 50 fields specified below MUST be extracted and stored
 **Field Verification**: solicitation_identifier field name MUST be verified via API schema inspection before implementation
 
 **TARGET_FIELDS** (49 confirmed + 1 TBD):
+
 ```
 contract_transaction_unique_key, contract_award_unique_key, action_date_fiscal_year,
 action_date, parent_award_id_piid, award_id_piid, modification_number,
@@ -124,6 +126,7 @@ multiple_or_single_award_idv, usaspending_permalink, [solicitation_identifier - 
 ```
 
 ### Subawards Field Requirements (usaspending_subawards_v2)
+
 **Data Type**: Procurement subawards only (no grants)
 **Required Fields**: ALL available fields from USASpending API
 **Extraction Strategy**: Full schema extraction to capture complete subaward data structure
