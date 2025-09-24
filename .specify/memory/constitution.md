@@ -351,36 +351,44 @@ Use the linked Data Insights repo’s data_processing patterns as guidance, but 
 We MUST design for <200GB free disk with up to ~75GB new data. The pipeline SHALL minimize peak disk usage and prevent mid-ETL aborts due to storage constraints.
 
 1. Streaming and Ephemeral Extracts
+
 - Archive ZIPs permanently; extract CSVs to an OS temp directory or `data/tmp/` and delete immediately after each chunk load.
 - Use COPY FROM STDIN or server-side COPY when feasible; otherwise stream local CSVs chunk-by-chunk with bounded temp space.
 - Config: `PERSIST_EXTRACTED_CSV=false` by default; when true, retain for debugging with retention policy.
 
 2. Chunked Staging and CTAS Batches
+
 - Process one API chunk (e.g., 7 days) end-to-end before starting the next to cap temporary growth.
-- For s2_interim, use per-chunk CTAS into a small temporary table `s2_interim.tmp_prime_awards_<chunk_id>`; immediately MERGE/UPSERT into the target table and drop the temp table.
+- For s2*interim, use per-chunk CTAS into a small temporary table `s2_interim.tmp_prime_awards*<chunk_id>`; immediately MERGE/UPSERT into the target table and drop the temp table.
 - Avoid full table rewrites; use INSERT ... ON CONFLICT (or MERGE) into s2/s3 targets keyed by business keys.
 
 3. UNLOGGED + Minimal Indexing During Load
+
 - For intermediary per-chunk tables, declare UNLOGGED to reduce WAL and disk churn when acceptable (not for critical persistent tables).
 - Delay heavy indexes until after a batch is finished, and only on final s3_processed tables. Maintain only primary keys/unique constraints needed for UPSERTs during ingestion.
 
 4. Vacuum/Analyze and Checkpointing
+
 - After each chunk commit, run targeted ANALYZE on affected tables; schedule VACUUM (not FULL) on large tables during low activity.
 - Persist a progress record per chunk so the pipeline resumes without repeating already-loaded work.
 
 5. Concurrency Limits and Disk Guardrails
+
 - Limit parallel chunks to prevent disk spikes: `MAX_CONCURRENT_CHUNKS=1..2` based on free space.
 - Enforce free-space checks: before extraction/loading, assert `MIN_FREE_GB` (e.g., 40GB). If below threshold, backoff and alert.
 - Target peak working set `TARGET_PEAK_GB` (e.g., 100GB) for sum of temp CSV + temp tables + WAL.
 
 6. Partitioning Strategy (Optional, Adopt When Needed)
+
 - If tables grow large, consider range/month partitions on `action_date` in s2/s3 to bound maintenance and accelerate chunk merges.
 - Create partitions on-demand per month being processed; detach/archive old partitions without copying whole tables.
 
 7. File Retention and Pruning
+
 - ZIPs: Retain per retention policy (default 90 days). CSVs: Ephemeral by default; when persisted, prune by freshest N months or size quota.
 
 8. Observability
+
 - Log per-chunk sizes (ZIP bytes, extracted CSV bytes, rows loaded), WAL growth estimates, and current free disk.
 - Surface alerts when free disk falls below `MIN_FREE_GB` or when temp working set exceeds `TARGET_PEAK_GB`.
 
