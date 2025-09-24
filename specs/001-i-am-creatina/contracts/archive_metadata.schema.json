@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://capture-insights.local/schemas/archive_metadata.schema.json",
+  "title": "Archive File Metadata",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "job_id",
+    "correlation_id",
+    "request",
+    "response",
+    "file",
+    "timing",
+    "chunk",
+    "integrity",
+    "system",
+    "fail_fast_triggered"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "job_id": { "type": "string", "format": "uuid" },
+    "correlation_id": { "type": "string", "format": "uuid" },
+    "request": {
+      "type": "object",
+      "required": [
+        "endpoint",
+        "payload_hash",
+        "date_from",
+        "date_to",
+        "date_type",
+        "award_type_scope"
+      ],
+      "properties": {
+        "endpoint": { "type": "string", "format": "uri" },
+        "payload_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "date_from": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "date_to": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "date_type": {
+          "type": "string",
+          "enum": ["action_date", "last_modified_date"]
+        },
+        "award_type_scope": { "type": "string", "enum": ["prime", "sub"] }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": ["status_url", "file_url", "http_status", "received_bytes"],
+      "properties": {
+        "status_url": { "type": "string", "format": "uri" },
+        "file_url": { "type": "string", "format": "uri" },
+        "http_status": { "type": "integer", "minimum": 100, "maximum": 599 },
+        "received_bytes": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "file": {
+      "type": "object",
+      "required": [
+        "archive_path_rel",
+        "archive_sha256",
+        "csv_expected_headers",
+        "csv_header_present",
+        "extracted_rows",
+        "extracted_csv_bytes"
+      ],
+      "properties": {
+        "archive_path_rel": { "type": "string" },
+        "archive_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "csv_expected_headers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "csv_header_present": { "type": "boolean" },
+        "extracted_rows": { "type": ["integer", "null"], "minimum": 0 },
+        "extracted_csv_bytes": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "timing": {
+      "type": "object",
+      "required": [
+        "requested_at",
+        "ready_at",
+        "download_started_at",
+        "download_completed_at"
+      ],
+      "properties": {
+        "requested_at": { "type": "string", "format": "date-time" },
+        "ready_at": { "type": "string", "format": "date-time" },
+        "download_started_at": { "type": "string", "format": "date-time" },
+        "download_completed_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "chunk": {
+      "type": "object",
+      "required": [
+        "window_start",
+        "window_end",
+        "chunk_index",
+        "chunk_span_days"
+      ],
+      "properties": {
+        "window_start": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "window_end": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "chunk_index": { "type": "integer", "minimum": 0 },
+        "chunk_span_days": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["zip_size_bytes", "checksum_verified"],
+      "properties": {
+        "zip_size_bytes": { "type": "integer", "minimum": 0 },
+        "checksum_verified": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "system": {
+      "type": "object",
+      "required": ["python_version", "platform", "free_gb_pre", "free_gb_post"],
+      "properties": {
+        "python_version": { "type": "string" },
+        "platform": { "type": "string" },
+        "free_gb_pre": { "type": "number", "minimum": 0 },
+        "free_gb_post": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "fail_fast_triggered": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

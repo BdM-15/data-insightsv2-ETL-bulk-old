@@ -1,0 +1,45 @@
+[project]
+name = "data-insightsv2-etl-bulk"
+version = "0.1.0"
+description = "USASpending bulk ETL pipeline (prime & subawards) with SQL-first transforms, storage-conscious processing, and fail-fast acquisition."
+authors = [ { name = "Capture Insights" } ]
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+license = { text = "Proprietary" }
+keywords = ["ETL", "USASpending", "PostgreSQL", "pgvector", "bulk-download"]
+
+dependencies = [
+    "requests>=2.32.0",
+    "tenacity>=8.2.0",
+    "psycopg[binary]>=3.1.18",
+    "python-dotenv>=1.0.0",
+    "fastjsonschema>=2.19.0",
+    "tqdm>=4.66.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "hypothesis>=6.99.0",
+    "black>=24.3.0",
+    "flake8>=7.0.0",
+    "mypy>=1.10.0"
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py313"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = false
+warn_unreachable = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-q"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"

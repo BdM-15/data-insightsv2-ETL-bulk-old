@@ -1,7 +1,7 @@
 <!--
 SYNC IMPACT REPORT - Constitution Update 2025-09-24
 
-Version Change: TEMPLATE → 1.0.0 → 1.1.0 → 1.2.0 → 1.3.0 (Added specific USASpending field requirements and API validation) → 1.4.0 (Added Data Request Structure & Ingestion; confirmed solicitation_identifier) → 1.5.0 (Added Monthly Incremental Delta-only Refresh; clarified date_type for historical vs incremental) → 1.6.0 (Added ETL Processing Guidance and Postgres description cleansing policy) → 1.7.0 (Added Storage-Conscious Processing and archiving options) → 1.8.0 (Added PostgreSQL configuration and config.py policy)
+Version Change: TEMPLATE → 1.0.0 → 1.1.0 → 1.2.0 → 1.3.0 (Added specific USASpending field requirements and API validation) → 1.4.0 (Added Data Request Structure & Ingestion; confirmed solicitation_identifier) → 1.5.0 (Added Monthly Incremental Delta-only Refresh; clarified date_type for historical vs incremental) → 1.6.0 (Added ETL Processing Guidance and Postgres description cleansing policy) → 1.7.0 (Added Storage-Conscious Processing and archiving options) → 1.8.0 (Added PostgreSQL configuration and config.py policy) → 1.9.0 (Added fail-fast acquisition failure policy) → 1.10.0 (Upgraded runtime baseline to Python 3.13+ and adopted uv for environment & dependency management)
 
 Modified Principles:
 - NEW: I. Data Integrity First (NON-NEGOTIABLE) - Government data accuracy and audit trails
@@ -21,6 +21,7 @@ Added Sections:
 - ETL Processing Guidance and Description Cleansing (ADDED v1.6.0)
 - Storage-Conscious Processing (ADDED v1.7.0)
 - PostgreSQL Database Configuration and Configuration Module Policy (ADDED v1.8.0)
+// Fail-fast acquisition failure policy (ADDED v1.9.0)
 
 Templates Requiring Updates:
 ✅ plan-template.md - Updated (Constitution Check section aligned with data pipeline principles)
@@ -86,9 +87,9 @@ Every ETL operation MUST be logged, monitored, and traceable. Structured logging
 
 ## Technology Standards
 
-**Programming Language**: Python 3.9+ for API extraction, orchestration, and small-scale operations
+**Programming Language**: Python 3.13+ (minimum) for API extraction, orchestration, and small-scale operations; enforce at runtime (process exits if <3.13)
 **Data Processing**: SQL within PostgreSQL for all transformations exceeding 1M records
-**Environment Management**: Virtual environments (venv or conda) MUST be used for dependency isolation
+**Environment Management**: `uv` MUST be used for deterministic, fast environment & dependency management (PEP 621 + lock). Virtual environments created/managed by uv automatically; no manual pip install flows.
 **Database**: PostgreSQL with pgvector extension for vector operations and bulk processing
 **Schema**: Database `capture_insights` with schemas `s1_raw` (raw), `s2_interim` (cleansing), and `s3_processed` (analytics); additional `util`/`public` as needed
 **API Integration**: USASpending Bulk Award API as primary data source (procurement awards only, no grants)
@@ -96,7 +97,7 @@ Every ETL operation MUST be logged, monitored, and traceable. Structured logging
 **Reference Implementation**: Follow patterns established in https://github.com/BdM-15/Data_Insights/tree/main/src/backend/data/data_acquisition
 **Vector Operations**: pgvector for semantic search and similarity operations
 **Data Formats**: JSON for API responses, normalized relational storage in PostgreSQL
-**Dependency Management**: requirements.txt for production, requirements-dev.txt for development dependencies
+**Dependency Management**: Managed via `pyproject.toml` + `uv.lock`; no ad-hoc pip installs committed. Regenerate lock on explicit dependency bumps only.
 **SQL Management**: Version-controlled SQL scripts for transformations, stored procedures for complex operations
 
 **Data Directory**: Local archive at `data/downloads/usaspending/{prime|sub}/YYYY/MM/` (configurable via `DOWNLOAD_DIR`); logs at `logs/`
@@ -249,6 +250,11 @@ All USASpending data requests and ingestion flows MUST adhere to the structure b
 
 - Use exponential backoff (e.g., Tenacity) for POST and status polling; fail-fast with clear, actionable logs on repeated errors.
 - Resume support: Progress tables track last successful chunk `start_date`, `end_date`, records count, status, and file paths.
+- Fail-Fast Acquisition Policy (NON-NEGOTIABLE): If any download or extraction error occurs for a chunk (e.g., network failure, checksum mismatch, incomplete ZIP), the pipeline MUST immediately stop further processing—no attempt to skip ahead or fill gaps automatically. The operator will manually restart from the last fully successful chunk end date.
+  - Rationale: Simplifies operational recovery and ensures no silent partial continuity gaps.
+  - Implementation Expectations: Mark the failing chunk with status=failed, persist error detail, and exit with non-zero code. Do not advance watermarks or partial date pointers.
+  - Config: `FAIL_FAST=true` by default; when `false` (rare diagnostic use only), the pipeline MAY attempt limited retries before termination but still MUST NOT skip forward.
+  - Observability: Emit a high-severity log with chunk window, error classification (network | integrity | server), attempt counts, and clear restart instructions referencing the last successful `end_date`.
 
 8. Observability and Audit
 
@@ -447,7 +453,7 @@ semantic_description AS capture_insights.util.clean_description(
 
 ## Development Workflow
 
-**Environment Setup**: Virtual environment creation and activation documented; Requirements installation scripted; Environment variables managed via .env files
+**Environment Setup**: `uv` commands documented (`uv python pin 3.13`, `uv sync`); Environment variables managed via .env files
 **Testing Requirements**: Unit tests for data transformation logic using pytest; Integration tests for database operations; End-to-end tests for complete ETL workflows; Virtual environment isolation for test execution
 **Code Review**: All ETL scripts must be reviewed for data integrity and performance; Database schema changes require architectural review; Python code style enforced via linting (black, flake8)
 **Deployment**: Staging environment required for testing with sample data before production deployment; Production deployments use same virtual environment configuration
@@ -461,4 +467,4 @@ This constitution governs all ETL pipeline development and data operations. All 
 
 **Compliance Review**: All pull requests must verify adherence to data integrity, schema consistency, and observability requirements. Performance benchmarks must be maintained or improved.
 
-**Version**: 1.8.0 | **Ratified**: 2025-09-24 | **Last Amended**: 2025-09-24
+**Version**: 1.9.0 | **Ratified**: 2025-09-24 | **Last Amended**: 2025-09-24
