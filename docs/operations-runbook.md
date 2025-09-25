@@ -39,16 +39,19 @@
 ### Morning Checklist (9:00 AM)
 
 1. **Check Pipeline Status**
+
    ```bash
    python scripts/monitor.py --status
    ```
 
 2. **Review Overnight Runs**
+
    ```bash
    python scripts/monitor.py --recent-failures --hours 12
    ```
 
 3. **Validate Data Quality**
+
    ```bash
    python scripts/run_diagnostics.py --quick
    ```
@@ -61,11 +64,13 @@
 ### Evening Operations (6:00 PM)
 
 1. **Run Incremental Pipeline**
+
    ```bash
    python scripts/run_incremental.py
    ```
 
 2. **Execute Data Retention**
+
    ```bash
    python scripts/maintenance.py --retention
    ```
@@ -78,11 +83,13 @@
 ### Weekly Operations (Sundays)
 
 1. **Full Validation Suite**
+
    ```bash
    python scripts/run_diagnostics.py --full
    ```
 
 2. **Database Maintenance**
+
    ```bash
    python scripts/maintenance.py --vacuum --reindex
    ```
@@ -97,11 +104,13 @@
 ### Key Metrics to Monitor
 
 1. **Pipeline Health**
+
    - Success/failure rates
    - Execution duration trends
    - Data volume changes
 
 2. **Data Quality**
+
    - Duplicate record rates
    - NULL value percentages
    - Schema compliance
@@ -113,12 +122,12 @@
 
 ### Alert Thresholds
 
-| Metric | Warning | Critical |
-|--------|---------|----------|
-| Pipeline failure rate | >10% | >25% |
-| Data freshness | >48 hours | >72 hours |
-| Storage usage | >80% | >95% |
-| Duplicate rate | >5% | >15% |
+| Metric                | Warning   | Critical  |
+| --------------------- | --------- | --------- |
+| Pipeline failure rate | >10%      | >25%      |
+| Data freshness        | >48 hours | >72 hours |
+| Storage usage         | >80%      | >95%      |
+| Duplicate rate        | >5%       | >15%      |
 
 ### Monitoring Commands
 
@@ -143,16 +152,19 @@ python scripts/monitor.py --export --format json
 #### 1. Pipeline Failure: "Database Connection Error"
 
 **Symptoms:**
+
 - Pipeline fails to start
 - Error: "Failed to connect to database"
 
 **Diagnosis:**
+
 ```bash
 # Test database connectivity
 python -c "from etl.config import Config; from etl.utils.config_manager import EnhancedConfigurationManager; cm = EnhancedConfigurationManager(); print(cm.validate_current_configuration())"
 ```
 
 **Resolution:**
+
 1. Check database service status
 2. Verify connection parameters in config
 3. Test network connectivity
@@ -161,16 +173,19 @@ python -c "from etl.config import Config; from etl.utils.config_manager import E
 #### 2. Pipeline Failure: "API Rate Limit Exceeded"
 
 **Symptoms:**
+
 - HTTP 429 errors in logs
 - Pipeline execution stops during acquisition
 
 **Diagnosis:**
+
 ```bash
 # Check recent API call patterns
 grep -i "rate limit\|429" logs/*.log | tail -20
 ```
 
 **Resolution:**
+
 1. Reduce `chunk_size` in configuration
 2. Increase retry delays
 3. Implement exponential backoff
@@ -179,16 +194,19 @@ grep -i "rate limit\|429" logs/*.log | tail -20
 #### 3. Data Quality Issues: High Duplicate Rate
 
 **Symptoms:**
+
 - Validation reports high duplicate percentage
 - Data volume larger than expected
 
 **Diagnosis:**
+
 ```bash
 # Run duplicate analysis
 python scripts/run_diagnostics.py --duplicates-only
 ```
 
 **Resolution:**
+
 1. Check incremental merge logic
 2. Verify watermark management
 3. Review deduplication rules
@@ -197,16 +215,19 @@ python scripts/run_diagnostics.py --duplicates-only
 #### 4. Storage Issues: Disk Space Full
 
 **Symptoms:**
+
 - Pipeline fails with "No space left on device"
 - Storage monitoring shows >95% usage
 
 **Diagnosis:**
+
 ```bash
 # Check disk usage by component
 python scripts/monitor.py --storage --detailed
 ```
 
 **Resolution:**
+
 1. Run emergency retention cleanup
    ```bash
    python scripts/maintenance.py --emergency-cleanup
@@ -220,16 +241,19 @@ python scripts/monitor.py --storage --detailed
 #### Pipeline Complete Failure
 
 1. **Stop all running processes**
+
    ```bash
    pkill -f "python scripts/"
    ```
 
 2. **Assess system state**
+
    ```bash
    python scripts/monitor.py --health-check
    ```
 
 3. **Review recent logs**
+
    ```bash
    tail -100 logs/pipeline.log
    ```
@@ -242,16 +266,19 @@ python scripts/monitor.py --storage --detailed
 #### Data Corruption
 
 1. **Isolate affected data**
+
    - Identify corrupted date range
    - Mark data as quarantined in database
 
 2. **Stop incremental processing**
+
    ```bash
    # Disable incremental pipeline
    touch work/.pipeline_disabled
    ```
 
 3. **Restore from backup**
+
    - Use database backup
    - Re-run historical pipeline for affected period
 
@@ -265,6 +292,7 @@ python scripts/monitor.py --storage --detailed
 ### Database Maintenance
 
 #### Weekly Database Health Check
+
 ```bash
 # Run comprehensive database analysis
 python scripts/maintenance.py --db-health-check
@@ -277,6 +305,7 @@ python scripts/maintenance.py --update-stats
 ```
 
 #### Monthly Deep Clean
+
 ```bash
 # Full vacuum and reindex
 python scripts/maintenance.py --full-vacuum --reindex
@@ -291,6 +320,7 @@ python scripts/maintenance.py --archive-metrics --days 90
 ### Configuration Updates
 
 #### Updating Pipeline Configuration
+
 ```bash
 # Validate new configuration
 python -c "from etl.utils.config_manager import EnhancedConfigurationManager; cm = EnhancedConfigurationManager(); print(cm.validate_current_configuration())"
@@ -303,6 +333,7 @@ python scripts/run_diagnostics.py --config-test
 ```
 
 #### Environment Migration
+
 ```bash
 # Export current configuration
 python scripts/setup.py --export-config --file config/backup.json
@@ -319,11 +350,13 @@ python scripts/run_diagnostics.py --full --env production
 ### Backup Strategy
 
 1. **Database Backups**
+
    - Daily automated backups via pg_dump
    - Weekly full database backups
    - Monthly archived backups
 
 2. **Configuration Backups**
+
    - Version controlled in Git
    - Environment-specific configs backed up daily
 
@@ -336,34 +369,38 @@ python scripts/run_diagnostics.py --full --env production
 #### Complete System Recovery
 
 1. **Infrastructure Setup**
+
    ```bash
    # Install dependencies
    python scripts/setup.py --install-all
-   
+
    # Setup database
    python scripts/setup.py --init-database
    ```
 
 2. **Restore Configuration**
+
    ```bash
    # Restore configuration from backup
    python scripts/setup.py --import-config --file backup/config.json
    ```
 
 3. **Restore Data**
+
    ```bash
    # Restore database from backup
    psql usaspending_etl < backup/database_backup.sql
-   
+
    # Verify data integrity
    python scripts/run_diagnostics.py --full
    ```
 
 4. **Resume Operations**
+
    ```bash
    # Run incremental catch-up
    python scripts/run_incremental.py --catch-up
-   
+
    # Verify pipeline health
    python scripts/monitor.py --health-check
    ```
@@ -386,11 +423,13 @@ python scripts/monitor.py --resource-utilization
 ### Optimization Techniques
 
 1. **Database Optimization**
+
    - Regular VACUUM ANALYZE
    - Index optimization
    - Query plan analysis
 
 2. **Pipeline Optimization**
+
    - Parallel processing tuning
    - Batch size optimization
    - Memory usage optimization
@@ -418,10 +457,12 @@ python scripts/monitor.py --bottleneck-analysis
 ### Configuration Hierarchy
 
 1. **Environment Variables** (highest priority)
+
    - Sensitive values (passwords, API keys)
    - Deployment-specific settings
 
 2. **Environment Files** (medium priority)
+
    - `config/production.json`
    - `config/development.json`
 
@@ -447,11 +488,13 @@ python scripts/setup.py --export-config --file backup.json
 ### Security Best Practices
 
 1. **Credential Management**
+
    - Store sensitive values in environment variables
    - Use encrypted configuration files
    - Regular credential rotation
 
 2. **Access Controls**
+
    - Database user permissions
    - File system permissions
    - Network security
@@ -466,10 +509,12 @@ python scripts/setup.py --export-config --file backup.json
 ### Support Escalation
 
 1. **Level 1: Automated Recovery**
+
    - Self-healing pipelines
    - Automatic retry mechanisms
 
 2. **Level 2: Operations Team**
+
    - Daily monitoring and maintenance
    - Standard troubleshooting procedures
 
@@ -486,5 +531,5 @@ python scripts/setup.py --export-config --file backup.json
 
 ---
 
-*Last Updated: [Current Date]*
-*Document Version: 1.0*
+_Last Updated: [Current Date]_
+_Document Version: 1.0_

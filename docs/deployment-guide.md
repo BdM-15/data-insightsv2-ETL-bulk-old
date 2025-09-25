@@ -3,6 +3,7 @@
 ## Prerequisites
 
 ### System Requirements
+
 - **OS**: Linux (Ubuntu 20.04+ recommended) or Windows 10+
 - **Python**: 3.13+
 - **Database**: PostgreSQL 14+ with pgvector extension
@@ -11,6 +12,7 @@
 - **Network**: Stable internet connection for API access
 
 ### Required Software
+
 ```bash
 # Ubuntu/Debian
 sudo apt update
@@ -29,12 +31,14 @@ choco install python postgresql git curl
 ### 1. Environment Setup
 
 #### Clone Repository
+
 ```bash
 git clone <repository-url> usaspending-etl
 cd usaspending-etl
 ```
 
 #### Create Virtual Environment
+
 ```bash
 # Using uv (recommended)
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -51,6 +55,7 @@ source .venv/bin/activate  # Linux/Mac
 ```
 
 #### Install Dependencies
+
 ```bash
 # Using uv
 uv pip install -e .
@@ -62,6 +67,7 @@ pip install -e .
 ### 2. Database Setup
 
 #### PostgreSQL Configuration
+
 ```bash
 # Start PostgreSQL service
 sudo systemctl start postgresql
@@ -86,6 +92,7 @@ CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 ```
 
 #### Database Initialization
+
 ```bash
 # Initialize database schema
 python scripts/setup.py --init-database
@@ -94,6 +101,7 @@ python scripts/setup.py --init-database
 ### 3. Configuration
 
 #### Environment Variables
+
 ```bash
 # Create environment file
 cat > .env << EOF
@@ -113,6 +121,7 @@ export $(cat .env | xargs)
 ```
 
 #### Configuration Files
+
 ```bash
 # Copy default configurations
 cp config/default.json config/production.json
@@ -122,6 +131,7 @@ nano config/production.json
 ```
 
 #### Validate Configuration
+
 ```bash
 python scripts/setup.py --validate-config
 ```
@@ -129,12 +139,14 @@ python scripts/setup.py --validate-config
 ### 4. Initial Data Load
 
 #### Test Connection
+
 ```bash
 # Test database and API connectivity
 python scripts/setup.py --test-connections
 ```
 
 #### Historical Data Load
+
 ```bash
 # Load initial dataset (last 30 days)
 python scripts/run_historical.py --days 30
@@ -146,6 +158,7 @@ tail -f logs/pipeline.log
 ### 5. Service Configuration
 
 #### Systemd Service (Linux)
+
 ```bash
 # Create service file
 sudo tee /etc/systemd/system/usaspending-etl.service > /dev/null << EOF
@@ -174,6 +187,7 @@ sudo systemctl start usaspending-etl
 ```
 
 #### Cron Jobs
+
 ```bash
 # Setup automated tasks
 crontab -e
@@ -197,6 +211,7 @@ crontab -e
 ### 1. Security Configuration
 
 #### Database Security
+
 ```sql
 -- Connect as superuser
 sudo -u postgres psql
@@ -213,6 +228,7 @@ REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 ```
 
 #### File Permissions
+
 ```bash
 # Set secure file permissions
 chmod 600 .env
@@ -222,6 +238,7 @@ chmod -R 750 etl/
 ```
 
 #### Firewall Configuration
+
 ```bash
 # Allow only necessary ports
 sudo ufw allow 22    # SSH
@@ -232,6 +249,7 @@ sudo ufw enable
 ### 2. Performance Optimization
 
 #### PostgreSQL Tuning
+
 ```bash
 # Edit PostgreSQL configuration
 sudo nano /etc/postgresql/14/main/postgresql.conf
@@ -259,6 +277,7 @@ effective_io_concurrency = 200
 ```
 
 #### Application Tuning
+
 ```json
 // config/production.json
 {
@@ -276,6 +295,7 @@ effective_io_concurrency = 200
 ### 3. Monitoring Setup
 
 #### Logging Configuration
+
 ```bash
 # Setup log rotation
 sudo tee /etc/logrotate.d/usaspending-etl > /dev/null << EOF
@@ -295,6 +315,7 @@ EOF
 ```
 
 #### Alerting Setup
+
 ```bash
 # Configure email alerts
 python scripts/setup.py --configure-alerts \
@@ -308,6 +329,7 @@ python scripts/setup.py --configure-alerts \
 ### 4. Backup Configuration
 
 #### Database Backups
+
 ```bash
 # Create backup script
 tee scripts/backup_database.sh > /dev/null << EOF
@@ -337,6 +359,7 @@ echo "0 2 * * * /path/to/usaspending-etl/scripts/backup_database.sh" | crontab -
 ```
 
 #### Configuration Backups
+
 ```bash
 # Create config backup script
 tee scripts/backup_config.sh > /dev/null << EOF
@@ -361,6 +384,7 @@ chmod +x scripts/backup_config.sh
 ## Environment-Specific Configurations
 
 ### Development Environment
+
 ```json
 // config/development.json
 {
@@ -375,6 +399,7 @@ chmod +x scripts/backup_config.sh
 ```
 
 ### Staging Environment
+
 ```json
 // config/staging.json
 {
@@ -389,6 +414,7 @@ chmod +x scripts/backup_config.sh
 ```
 
 ### Production Environment
+
 ```json
 // config/production.json
 {
@@ -411,6 +437,7 @@ chmod +x scripts/backup_config.sh
 ## Health Checks
 
 ### Post-Deployment Validation
+
 ```bash
 # Run comprehensive health check
 python scripts/setup.py --health-check
@@ -426,6 +453,7 @@ systemctl status usaspending-etl
 ```
 
 ### Performance Baseline
+
 ```bash
 # Establish performance baseline
 python scripts/monitor.py --establish-baseline
@@ -437,6 +465,7 @@ python scripts/run_incremental.py --dry-run --profile
 ## Rollback Procedures
 
 ### Application Rollback
+
 ```bash
 # Stop current version
 sudo systemctl stop usaspending-etl
@@ -453,6 +482,7 @@ python scripts/monitor.py --health-check
 ```
 
 ### Database Rollback
+
 ```bash
 # Stop application
 sudo systemctl stop usaspending-etl
@@ -469,16 +499,19 @@ sudo systemctl start usaspending-etl
 ## Scaling Considerations
 
 ### Horizontal Scaling
+
 - Database replication for read queries
 - Load balancing for API requests
 - Distributed task processing
 
 ### Vertical Scaling
+
 - Increase server resources (CPU, RAM, Storage)
 - Optimize PostgreSQL configuration
 - Tune application parameters
 
 ### Storage Scaling
+
 - Implement table partitioning
 - Use compressed storage formats
 - Automated data archival
@@ -498,5 +531,5 @@ sudo systemctl start usaspending-etl
 
 ---
 
-*Last Updated: [Current Date]*
-*Document Version: 1.0*
+_Last Updated: [Current Date]_
+_Document Version: 1.0_

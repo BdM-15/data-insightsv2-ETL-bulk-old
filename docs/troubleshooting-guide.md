@@ -3,6 +3,7 @@
 ## Quick Reference
 
 ### Common Commands
+
 ```bash
 # Check pipeline status
 python scripts/monitor.py --status
@@ -18,6 +19,7 @@ python scripts/setup.py --validate-config
 ```
 
 ### Emergency Procedures
+
 ```bash
 # Stop all pipelines
 pkill -f "python scripts/"
@@ -36,17 +38,21 @@ python scripts/run_historical.py --recovery-mode
 #### Database Connection Failures
 
 **Error Patterns:**
+
 - "Failed to connect to database"
 - "Connection refused"
 - "Authentication failed"
 
 **Diagnostic Steps:**
+
 1. Test database connectivity:
+
    ```bash
    psql -h $ETL_DATABASE_HOST -p $ETL_DATABASE_PORT -U $ETL_DATABASE_USER -d $ETL_DATABASE_NAME
    ```
 
 2. Check database service:
+
    ```bash
    systemctl status postgresql
    ```
@@ -57,6 +63,7 @@ python scripts/run_historical.py --recovery-mode
    ```
 
 **Solutions:**
+
 - Restart database service
 - Check firewall rules
 - Verify credentials
@@ -65,12 +72,15 @@ python scripts/run_historical.py --recovery-mode
 #### API Connection Issues
 
 **Error Patterns:**
+
 - "HTTP 429: Rate limit exceeded"
 - "Connection timeout"
 - "SSL certificate verification failed"
 
 **Diagnostic Steps:**
+
 1. Test API endpoint:
+
    ```bash
    curl -I "https://api.usaspending.gov/api/v2/awards/"
    ```
@@ -81,6 +91,7 @@ python scripts/run_historical.py --recovery-mode
    ```
 
 **Solutions:**
+
 - Implement exponential backoff
 - Reduce request frequency
 - Contact API provider for limits
@@ -91,11 +102,13 @@ python scripts/run_historical.py --recovery-mode
 #### Data Quality Problems
 
 **Error Patterns:**
+
 - High duplicate rates
 - Unexpected NULL values
 - Schema validation failures
 
 **Diagnostic Commands:**
+
 ```bash
 # Check data quality metrics
 python scripts/run_diagnostics.py --data-quality
@@ -108,6 +121,7 @@ python scripts/run_diagnostics.py --schema-check
 ```
 
 **Solutions:**
+
 - Review deduplication logic
 - Check data transformation rules
 - Validate source data quality
@@ -116,11 +130,13 @@ python scripts/run_diagnostics.py --schema-check
 #### Performance Degradation
 
 **Symptoms:**
+
 - Slow pipeline execution
 - High memory usage
 - Database locks
 
 **Diagnostic Commands:**
+
 ```bash
 # Performance analysis
 python scripts/monitor.py --performance-report
@@ -133,6 +149,7 @@ python scripts/monitor.py --resource-usage
 ```
 
 **Solutions:**
+
 - Optimize database queries
 - Add missing indexes
 - Increase batch sizes
@@ -143,10 +160,12 @@ python scripts/monitor.py --resource-usage
 #### Disk Space Problems
 
 **Error Patterns:**
+
 - "No space left on device"
 - "Disk quota exceeded"
 
 **Diagnostic Commands:**
+
 ```bash
 # Check disk usage
 df -h
@@ -157,6 +176,7 @@ python scripts/monitor.py --storage --detailed
 ```
 
 **Solutions:**
+
 ```bash
 # Emergency cleanup
 python scripts/maintenance.py --emergency-cleanup
@@ -171,11 +191,13 @@ python scripts/maintenance.py --archive --days 30
 #### Database Growth Issues
 
 **Symptoms:**
+
 - Rapidly growing database size
 - Slow query performance
 - Table bloat
 
 **Diagnostic Commands:**
+
 ```bash
 # Database size analysis
 python scripts/maintenance.py --db-size-analysis
@@ -185,6 +207,7 @@ python scripts/maintenance.py --bloat-check
 ```
 
 **Solutions:**
+
 ```bash
 # Vacuum and analyze
 python scripts/maintenance.py --vacuum --analyze
@@ -201,11 +224,13 @@ python scripts/maintenance.py --partition-tables
 #### Environment Configuration
 
 **Error Patterns:**
+
 - "Configuration validation failed"
 - "Missing required setting"
 - "Invalid configuration value"
 
 **Diagnostic Commands:**
+
 ```bash
 # Validate configuration
 python scripts/setup.py --validate-config
@@ -218,6 +243,7 @@ python scripts/setup.py --test-config
 ```
 
 **Solutions:**
+
 - Check environment variables
 - Validate config file syntax
 - Review configuration inheritance
@@ -228,11 +254,13 @@ python scripts/setup.py --test-config
 #### Orchestration Failures
 
 **Error Patterns:**
+
 - Pipeline hangs indefinitely
 - Processes fail to start
 - Inconsistent execution results
 
 **Diagnostic Commands:**
+
 ```bash
 # Check running processes
 ps aux | grep python
@@ -245,6 +273,7 @@ python scripts/monitor.py --execution-history
 ```
 
 **Solutions:**
+
 - Kill hanging processes
 - Clear work directory locks
 - Reset pipeline state
@@ -253,11 +282,13 @@ python scripts/monitor.py --execution-history
 #### Data Consistency Issues
 
 **Symptoms:**
+
 - Missing data for some dates
 - Inconsistent record counts
 - Failed data validation
 
 **Diagnostic Commands:**
+
 ```bash
 # Data consistency check
 python scripts/run_diagnostics.py --consistency
@@ -270,6 +301,7 @@ python scripts/run_diagnostics.py --record-counts
 ```
 
 **Solutions:**
+
 - Re-run failed date ranges
 - Check watermark logic
 - Validate merge operations
@@ -280,6 +312,7 @@ python scripts/run_diagnostics.py --record-counts
 ### Log Analysis
 
 #### Centralized Logging
+
 ```bash
 # View all logs
 tail -f logs/*.log
@@ -296,6 +329,7 @@ cat logs/pipeline.log | jq '.level="ERROR"'
 ```
 
 #### Log Rotation
+
 ```bash
 # Archive old logs
 python scripts/maintenance.py --archive-logs
@@ -310,6 +344,7 @@ python scripts/maintenance.py --cleanup-logs --days 7
 ### Database Debugging
 
 #### Query Analysis
+
 ```sql
 -- Check long-running queries
 SELECT query, query_start, state, wait_event_type
@@ -317,7 +352,7 @@ FROM pg_stat_activity
 WHERE state = 'active' AND query_start < now() - interval '5 minutes';
 
 -- Check table sizes
-SELECT schemaname, tablename, 
+SELECT schemaname, tablename,
        pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
 FROM pg_tables
 WHERE schemaname IN ('s1_raw', 's2_interim', 's3_processed')
@@ -330,6 +365,7 @@ ORDER BY idx_scan DESC;
 ```
 
 #### Lock Analysis
+
 ```sql
 -- Check for locks
 SELECT blocked_locks.pid AS blocked_pid,
@@ -348,6 +384,7 @@ WHERE NOT blocked_locks.granted;
 ### Performance Profiling
 
 #### Pipeline Profiling
+
 ```bash
 # Profile pipeline execution
 python -m cProfile -o profile.stats scripts/run_incremental.py
@@ -360,6 +397,7 @@ python -m memory_profiler scripts/run_incremental.py
 ```
 
 #### Database Profiling
+
 ```bash
 # Enable query logging
 echo "log_statement = 'all'" >> postgresql.conf
@@ -374,6 +412,7 @@ python scripts/maintenance.py --slow-query-report
 ### Partial Recovery
 
 #### Single Table Recovery
+
 ```bash
 # Identify affected table
 python scripts/run_diagnostics.py --table s3_processed.awards
@@ -389,6 +428,7 @@ python scripts/run_diagnostics.py --table s3_processed.awards --date-range 2024-
 ```
 
 #### Date Range Recovery
+
 ```bash
 # Clear affected date range
 python scripts/maintenance.py --clear-date-range 2024-01-01 2024-01-07
@@ -403,6 +443,7 @@ python scripts/run_diagnostics.py --date-range 2024-01-01 2024-01-07
 ### Full System Recovery
 
 #### Complete Database Recovery
+
 ```bash
 # Stop all pipelines
 pkill -f "python scripts/"
@@ -423,6 +464,7 @@ python scripts/run_diagnostics.py --full
 ```
 
 #### Configuration Recovery
+
 ```bash
 # Reset to default configuration
 cp config/default.json config/current.json
@@ -439,6 +481,7 @@ python scripts/setup.py --validate-config
 ### Monitoring Setup
 
 #### Automated Alerts
+
 ```bash
 # Setup email alerts for critical issues
 python scripts/setup.py --configure-alerts --email admin@company.com
@@ -451,6 +494,7 @@ python scripts/setup.py --set-thresholds --error-rate 10 --storage-usage 80
 ```
 
 #### Health Checks
+
 ```bash
 # Setup automated health checks
 crontab -e
@@ -463,6 +507,7 @@ crontab -e
 ### Backup Automation
 
 #### Database Backups
+
 ```bash
 # Setup automated backups
 crontab -e
@@ -471,6 +516,7 @@ crontab -e
 ```
 
 #### Configuration Backups
+
 ```bash
 # Setup config backups
 crontab -e
@@ -480,6 +526,7 @@ crontab -e
 ### Capacity Planning
 
 #### Storage Monitoring
+
 ```bash
 # Setup storage alerts
 crontab -e
@@ -487,6 +534,7 @@ crontab -e
 ```
 
 #### Performance Baseline
+
 ```bash
 # Establish performance baselines
 python scripts/monitor.py --establish-baseline
@@ -499,15 +547,17 @@ crontab -e
 ## Support Contacts
 
 ### Internal Support
+
 - **Operations Team**: operations@company.com
 - **Engineering Team**: engineering@company.com
 - **Database Admin**: dba@company.com
 
 ### External Support
+
 - **USASpending.gov API Support**: [API Documentation](https://api.usaspending.gov/)
 - **PostgreSQL Community**: [PostgreSQL Support](https://www.postgresql.org/support/)
 
 ---
 
-*Last Updated: [Current Date]*
-*Document Version: 1.0*
+_Last Updated: [Current Date]_
+_Document Version: 1.0_
