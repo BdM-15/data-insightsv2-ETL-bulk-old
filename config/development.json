@@ -1,0 +1,14 @@
+{
+  "log_level": "DEBUG",
+  "enable_metrics": true,
+  "disk_limit_gb": 20,
+  "database_name": "usaspending_etl_dev",
+  "validation_rules": {
+    "max_error_rate_percent": 20,
+    "data_freshness_hours": 72
+  },
+  "pipeline_settings": {
+    "batch_size": 500,
+    "parallel_workers": 2
+  }
+}

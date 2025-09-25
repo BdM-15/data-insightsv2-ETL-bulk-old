@@ -14,7 +14,7 @@ dependencies = [
     "psycopg[binary]>=3.1.18",
     "python-dotenv>=1.0.0",
     "fastjsonschema>=2.19.0",
-    "tqdm>=4.66.0"
+    "tqdm>=4.66.0",
 ]
 
 [project.optional-dependencies]
@@ -43,3 +43,7 @@ addopts = "-q"
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["etl*"]
+exclude = ["sql*", "specs*", "logs*", "data*"]

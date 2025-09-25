@@ -1,0 +1,44 @@
+Metadata-Version: 2.4
+Name: data-insightsv2-etl-bulk
+Version: 0.1.0
+Summary: USASpending bulk ETL pipeline (prime & subawards) with SQL-first transforms, storage-conscious processing, and fail-fast acquisition.
+Author: Capture Insights
+License: Proprietary
+Keywords: ETL,USASpending,PostgreSQL,pgvector,bulk-download
+Requires-Python: <3.14,>=3.13
+Description-Content-Type: text/markdown
+Requires-Dist: requests>=2.32.0
+Requires-Dist: tenacity>=8.2.0
+Requires-Dist: psycopg[binary]>=3.1.18
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: fastjsonschema>=2.19.0
+Requires-Dist: tqdm>=4.66.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.2.0; extra == "dev"
+Requires-Dist: hypothesis>=6.99.0; extra == "dev"
+Requires-Dist: black>=24.3.0; extra == "dev"
+Requires-Dist: flake8>=7.0.0; extra == "dev"
+Requires-Dist: mypy>=1.10.0; extra == "dev"
+
+# USASpending ETL Pipeline
+
+A storage-conscious, fail-fast ETL pipeline for USASpending procurement data.
+
+## Features
+
+- Bulk download of prime awards and subawards via USASpending API
+- PostgreSQL-based 3-layer processing (raw → interim → processed)
+- Deduplication with configurable precedence rules
+- Incremental processing with watermarks
+- Archive retention and integrity checking
+- Comprehensive observability and metrics
+
+## Requirements
+
+- Python 3.13+
+- PostgreSQL 14+ with pgvector extension
+- 40GB+ free disk space for processing
+
+## Quick Start
+
+See `specs/001-i-am-creatina/quickstart.md` for detailed setup and usage instructions.

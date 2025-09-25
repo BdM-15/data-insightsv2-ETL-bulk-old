@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+data_insightsv2_etl_bulk.egg-info/PKG-INFO
+data_insightsv2_etl_bulk.egg-info/SOURCES.txt
+data_insightsv2_etl_bulk.egg-info/dependency_links.txt
+data_insightsv2_etl_bulk.egg-info/requires.txt
+data_insightsv2_etl_bulk.egg-info/top_level.txt
+etl/__init__.py
+etl/config.py
+etl/acquisition/api_client.py
+etl/utils/__init__.py
+etl/utils/disk.py
+etl/utils/hash.py
+etl/utils/logging.py
+etl/utils/runtime.py

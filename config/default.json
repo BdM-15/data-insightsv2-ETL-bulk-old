@@ -1,0 +1,28 @@
+{
+  "api_base_url": "https://api.usaspending.gov/api/v2/",
+  "chunk_size": 10000,
+  "max_retries": 3,
+  "disk_limit_gb": 50,
+  "enable_metrics": true,
+  "log_level": "INFO",
+  "work_dir": "./work",
+  "database_host": "localhost",
+  "database_port": 5432,
+  "database_name": "usaspending_etl",
+  "retention_days": {
+    "raw_data": 30,
+    "interim_data": 90,
+    "processed_data": 365,
+    "metrics": 90
+  },
+  "pipeline_settings": {
+    "batch_size": 1000,
+    "parallel_workers": 4,
+    "timeout_seconds": 300
+  },
+  "validation_rules": {
+    "max_error_rate_percent": 10,
+    "data_freshness_hours": 48,
+    "storage_usage_threshold_percent": 80
+  }
+}

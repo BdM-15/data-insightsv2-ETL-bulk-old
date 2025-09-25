@@ -1,0 +1,21 @@
+{
+  "log_level": "WARNING",
+  "enable_metrics": true,
+  "disk_limit_gb": 100,
+  "database_name": "usaspending_etl_prod",
+  "validation_rules": {
+    "max_error_rate_percent": 5,
+    "data_freshness_hours": 24
+  },
+  "pipeline_settings": {
+    "batch_size": 2000,
+    "parallel_workers": 8,
+    "timeout_seconds": 600
+  },
+  "retention_days": {
+    "raw_data": 14,
+    "interim_data": 60,
+    "processed_data": 1095,
+    "metrics": 180
+  }
+}
